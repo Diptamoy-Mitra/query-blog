@@ -40,7 +40,6 @@ function Header() {
                 </Link>
                 <Navbar.Toggle />
             </div>
-
              {/* humberger menu */}
             <Navbar.Collapse>
                 <Navbar.Link active={path === '/'} as={'div'}>
