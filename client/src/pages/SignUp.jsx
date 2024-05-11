@@ -35,6 +35,8 @@ export default function SignUp() {
     try {
       setLoading(true);
       setErrorMessage(null)
+
+      //sign up new account
       const res = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: {
@@ -50,6 +52,8 @@ export default function SignUp() {
       }
       setLoading(false);
 
+
+      //if res ok then navigate to sign in page
       if(res.ok){
         navigate('/sign-in')
       }
