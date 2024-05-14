@@ -4,12 +4,21 @@ import React from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 
 
+//comes from redux
+import { signInFailure, signInSuccess,signInStart } from '../redux/user/userSlice';
+import { useDispatch,useSelector } from 'react-redux';
+
+
 export default function Signin() {
 
   //state for formData
   const [formData, setFormData] = React.useState({});
-  const [errorMessage, setErrorMessage] = React.useState(null);
-  const [loading, setLoading] = React.useState(false);
+  // const [errorMessage, setErrorMessage] = React.useState(null);
+  // const [loading, setLoading] = React.useState(false);
+
+  const {loading, error:errorMessage}=useSelector(state => state.user)
+
+
 
   //handle change function for input fields
   const handleChange = (e) => {
@@ -24,17 +33,23 @@ export default function Signin() {
   //useNavigate hook
   const navigate=useNavigate();
 
+  //for dispatch
+  const dispatch=useDispatch();
+
   //handle submit function for form
   const handleSubmit = async (e) => {
     e.preventDefault();
     // console.log(formData, "formdata")
     if ( !formData.email || !formData.password) {
-      return setErrorMessage('All fields are required, please fill all fields')
+      // return setErrorMessage('All fields are required, please fill all fields')
+
+      return dispatch(signInFailure('All fields are required, please fill all fields'))
 
     }
     try {
-      setLoading(true);
-      setErrorMessage(null)
+      // setLoading(true);
+      // setErrorMessage(null)
+      dispatch(signInStart())
 
       //sign up new account
       const res = await fetch('/api/auth/signin', {
@@ -48,21 +63,25 @@ export default function Signin() {
       const data = await res.json();
       // console.log(data, '*** data')
       if (data.success === false) {
-        setErrorMessage(data.message)
+        // setErrorMessage(data.message)
+        dispatch(signInFailure(data.message))
       }
-      setLoading(false);
+      // setLoading(false);
 
 
       //if res ok then navigate to sign in page
       if(res.ok){
+        dispatch(signInSuccess(data))
         navigate('/')
       }
 
 
 
     } catch (error) {
-      setErrorMessage('Something went wrong, please try again')
-      setLoading(false);
+      // setErrorMessage('Something went wrong, please try again')
+      // setLoading(false); 
+
+      dispatch(signInFailure(error.message))
     }
   }
 
