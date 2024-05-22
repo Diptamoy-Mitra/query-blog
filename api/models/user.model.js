@@ -15,6 +15,10 @@ const userSchema = new mongoose.Schema({
     password: {
         type: String,
         required: true,
+    },
+    profilePicture:{
+        type: String,
+        default :'https://images.app.goo.gl/Mxh5RJ3cfdkzijZC9'
     }
 }, {
      timestamps:true                //time of user creation and update time

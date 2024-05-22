@@ -54,7 +54,7 @@ export const signin = async (req, res, next) => {
         const validUser = await User.findOne({ email });
         console.log(validUser)
         if (!validUser) {
-           return next(errorHandler(404, "User Not Found!!"))
+            return next(errorHandler(404, "User Not Found!!"))
         }
 
         //password valid or not
@@ -90,4 +90,63 @@ export const signin = async (req, res, next) => {
 
 
 
+}
+
+//google auth 
+export const google = async (req, res, next) => {
+    const { email, name, googlePhotoUrl } = req.body;
+
+    try {
+
+        //check user exist or not
+        const user = await User.findOne({ email });
+
+        //if user present 
+        if (user) {
+            const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
+
+            const { password, ...rest } = user._doc;
+
+            res.status(200).cookie('access_token', token, {
+                httpOnly: true,
+            }).json(rest)
+        }
+
+        //new user
+        else {
+            //in models mongodb must require password, but when we signup with google then firebase authenticate with email only but password required to store the user in mongodb so we create or generate random password for that user
+
+            const generatedPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8);
+
+            //hasing that password
+            const hashedPassword = bcryptjs.hashSync(generatedPassword, 10);
+
+            //new user creation
+            const newUser = new User(
+                {
+                    username: name.toLowerCase().split(' ').join('') + Math.random().toString(9).slice(-4),
+
+                    email,
+                    password: hashedPassword,
+                    profilePicture: googlePhotoUrl,
+
+
+
+                }
+            )
+        };
+
+        await newUser.save();
+        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
+
+        const { password, ...rest } = user._doc;
+
+        res.status(200).cookie('access_token', token, {
+            httpOnly: true,
+        }).json(rest);
+
+
+    } catch (error) {
+        console.log("error in google function",error)
+    }
 }
